@@ -1,6 +1,7 @@
 from PIL import Image
 from PIL.ExifTags import TAGS
 from PIL.ExifTags import GPSTAGS
+import sys
 #                    Has GPSInfo?
 # stratInsanity.JPG [√]   'GPSInfo': {1: 'N', 2: (36.0, 7.0, 28.05), 3: 'W', 4: (115.0, 10.0, 6.97), 5: b'\x00', 6: 629.3669064748201, 7: (9.0, 37.0, 28.0), 12: 'K', 13: 0.0, 16: 'M', 17: 222.91115311909263, 23: 'M', 24: 222.91115311909263, 29: '2018:06:21', 31: 66.15432098765432}
     # Acceptable Google Format: (36 7 28.05 N 115 10 6.97 W)
@@ -18,7 +19,22 @@ from PIL.ExifTags import GPSTAGS
 # trashCam.HEIC [Incompatible File Type]
 # yellowtintCam.HEIC [Incompatible File Type]
 
+# Change to whichever photo you want to use
 filename = '4thJuly.JPG'
+
+img_file = filename
+image = Image.open(img_file)
+exifD ={}
+
+for tag, value in image._getexif().items():
+ if tag in TAGS:
+  exifD[TAGS[tag]] = value
+
+if 'GPSInfo' not in exifD:
+ print('Your file does not have GPSInfo')
+ sys.exit()
+
+
 
 def get_exif(filename):
 	image = Image.open(filename)
@@ -27,7 +43,7 @@ def get_exif(filename):
 
 exif = get_exif(filename)
 
-# Turns number tags in word tags. 34853 -> GPSInfo
+# Turns number tags into word tags. 34853 -> GPSInfo
 def get_labeled_exif(exif):
 	labeled = {}
 	for (key,val) in exif.items():
@@ -41,13 +57,15 @@ labeled = get_labeled_exif(exif)
 
 def get_geotagging(exif):
 	if not exif:
-		raise ValueError("No EXIF metadata found")
+		print("No EXIF metadata found")
+		# quit()
 
 	geotagging = {}
 	for (idx, tag) in TAGS.items():
 		if tag == 'GPSInfo':
 			if idx not in exif:
-				raise ValueError("No EXIF geotagging found")
+				print("No EXIF geotagging found")
+				# quit()
 
 			for (key, val) in GPSTAGS.items():
 				if key in exif[idx]:
@@ -58,64 +76,6 @@ def get_geotagging(exif):
 exif = get_exif(filename)
 geotags = get_geotagging(exif)
 print(geotags)
-
-def get_decimal_from_dms(dms, ref):
-
-    degrees = dms[0][0] / dms[0][1]
-    minutes = dms[1][0] / dms[1][1] / 60.0
-    seconds = dms[2][0] / dms[2][1] / 3600.0
-
-    if ref in ['S', 'W']:
-        degrees = -degrees
-        minutes = -minutes
-        seconds = -seconds
-
-    return round(degrees + minutes + seconds, 5)
-
-def get_coordinates(geotags):
-    lat = get_decimal_from_dms(geotags['GPSLatitude'], geotags['GPSLatitudeRef'])
-
-    lon = get_decimal_from_dms(geotags['GPSLongitude'], geotags['GPSLongitudeRef'])
-
-    return (lat,lon)
-
-
-exif = get_exif(filename)
-geotags = get_geotagging(exif)
-# print(get_coordinates(geotags))
-
-# def get_decimal_from_dms(dms, ref):
-# 	degrees = dms[0][0] / dms[0][1]
-# 	minutes = dms[1][0] / dms[1][1] / 60.0
-# 	seconds = dms[2][0] / dms[2][1] / 3600.0
-
-# 	if ref in ['S', 'W']:
-# 		degrees = -degrees
-# 		minutes = -minutes
-# 		seconds = -seconds
-# 	return round(degrees + minutes + seconds, 5)
-
-# def get_coordinates(geotags):
-# 	lat = get_decimal_from_dms(geotags['GPSLatitude'], geotags['GPSLatitudeRef'])
-
-# 	lon = get_decimal_from_dms(geotags['GPSLongitude'], geotags['GPSLongitudeRef'])
-
-# 	return(lat,lon)
-
-# exif = get_exif(filename)
-# geotags = get_geotagging(exif)
-# print(get_coordinates(geotags))
-
-
-
-
-
-
-
-
-
-
-
 
 
 
