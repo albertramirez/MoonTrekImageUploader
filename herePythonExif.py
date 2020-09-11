@@ -19,7 +19,8 @@ import sys
 # trashCam.HEIC [Incompatible File Type]
 # yellowtintCam.HEIC [Incompatible File Type]
 
-# Change to whichever photo you want to use
+# Change name to whichever photo you want to use
+# and the path, I stored mine in the same folder/location as the .py file was stored
 filename = '4thJuly.JPG'
 
 img_file = filename
